@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}FilmIA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="height: 100vh; width:100vw;">
+<div class="container bg-light border border-light rounded-3">
+    <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+      <div class="col-10 col-sm-8 col-lg-6">
+        <img src="{{ url_for('static', filename='preview.jpg') }}" class="d-block mx-lg-auto img-fluid border border-light rounded-3" alt="Bootstrap Themes" width="700" height="500" loading="lazy">
+      </div>
+      <div class="col-lg-6">
+        <img src="{{ url_for('static', filename='FilmIA.png') }}" alt="Home" style="height: 80px;">
+        <h1 class="display-5 fw-bold lh-1 mb-3">FilmIA</h1>
+        <p class="lead fw-bold">Deja de buscar, empieza a disfrutar.</p>
+        <p class="lead">
+            Encuentra tu próxima película o serie en segundos, sin perder horas
+            eligiendo.
+        </p>
+        <div class="d-grid gap-2 d-md-flex justify-content-center">
+            <a href="/signup" class="btn btn-secondary btn-lg px-4 me-md-2">
+                Registrate
+            </a>
+            <a href="/signin" class="btn btn-secondary btn-lg px-4 me-md-2">
+                Inicia Sesion
+            </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

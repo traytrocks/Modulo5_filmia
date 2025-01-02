@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es" data-bs-theme="dark">
+    <head>
+        {% block head %}
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        {% block styles %}
+            {{ bootstrap.load_css() }}
+            <style>
+                :root {
+                    --bs-body-color: #000000;
+                }
+            </style>
+        {% endblock %}
+
+        <title>{% block title %}FilmIA{% endblock %}</title>
+        {% endblock %}
+    </head>
+    <body>
+        <!-- Your page content -->
+        {% block content %}{% endblock %}
+        {% block signIn %}{% endblock %}
+        {% block signUp %}{% endblock %}
+
+        {% block scripts %}
+            <!-- Optional JavaScript -->
+            {{ bootstrap.load_js() }}
+        {% endblock %}
+    </body>
+</html>

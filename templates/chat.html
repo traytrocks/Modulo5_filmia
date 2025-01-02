@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    FilmIA
+{% endblock %}
+
+{% block content %}
+    <div class="d-md-flex justify-content-between">
+        <div class="pt-3 pb-2 ps-5">
+            <a href="/"  class="btn btn-secondary">
+                HOME
+            </a>
+        </div>
+        <div class="pt-3 pb-2 pe-5">
+            <a href="{{ profile_url }}" class="btn btn-secondary">
+                PERFIL
+            </a>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center align-items-center">
+        <div class="bg-light border border-light rounded-3 pb-2">
+            <div class="container">
+                <h2 class="d-md-flex justify-content-center">Chat de {{user.first_name}} {{user.last_name}}</h2>
+                <div class="px-4 pt-4">
+                    <div class="d-inline input-group mb-3">
+                        <form method="POST">
+                                <div class="d-flex">
+                                <input name="message" required="required" class="form-control" placeholder="Enviar mensaje a FilmIA" aria-label="Tu mensaje" aria-describedby="send-message"/>
+                                <input type="submit" class="btn btn-secondary" id="send-message" name="intent" value="Enviar"/>
+                            </div>
+                        </form>
+                        <div class="d-md-flex justify-content-around pt-2">
+                            <div class="mb-1">
+                                <form method="POST">
+                                    <input type="submit" class="btn btn-secondary" id="send-message-pre1" name="intent" value="Genero favorito"/>
+                                </form>
+                            </div>
+                            <div class="mb-1">
+                                <form method="POST">
+                                    <input type="submit" class="btn btn-secondary" id="send-message-pre2" name="intent" value="Peliculas favoritas"/>
+                                </form>
+                            </div>
+                            <div class="mb-1">
+                                <form method="POST">
+                                    <input type="submit" class="btn btn-secondary" id="send-message-pre3" name="intent" value="Quiero algo distinto"/>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-auto px-5 py-5 border rounded-3 border-4" style="max-height: 70vh;">
+                    {% for message in user.messages[::-1] %}
+                        {% if message.author == 'assistant' %}
+                            <div class="d-flex flex-row justify-content-start mb-4">
+                                <img src="{{ url_for('static', filename='FilmIA.png') }}" alt="avatar 1" style="width: 45px; height: 100%;">
+                                <div class="p-3 ms-3" style="border-radius: 1.125rem 1.125rem 1.125rem 0; background: #EEE;">
+                                    <p class="small mb-0">{{ message.content }}</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="d-flex flex-row justify-content-end mb-4">
+                                <div class="p-3 me-3" style="border-radius: 1.125rem 1.125rem 0 1.125rem; background: grey; box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);">
+                                    <p class="small mb-0">{{ message.content }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

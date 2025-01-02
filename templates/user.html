@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ user.first_name }}
+{% endblock %}
+
+{% block content %}
+
+<div class="d-md-flex justify-content-between py-3">
+    <div class="pt-3 pb-2 ps-5">
+        <a href="/"  class="btn btn-secondary">
+            HOME
+        </a>
+    </div>
+    <div class="bg-light border border-light rounded-3 py-2 px-5">
+        <h1>Perfil de {{user.first_name}}</h1>
+    </div>
+    <div class="pt-3 pb-2 pe-5">
+        <a href="{{ chat_url }}" class="btn btn-secondary">
+            CHAT
+        </a>
+    </div>
+</div>
+<div class="d-flex justify-content-center align-items-center mt-5">
+    <div class="bg-light border border-light rounded-3 p-5">
+        <div>
+            <div class="mb-3">
+                <h2><b>Informacion personal</b></h2>
+                <form method="POST">
+                    <div class="mb-2">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <label><b>Email:</b></label>
+                            <input value={{ user.email }} disabled></input>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <label><b>Nombre:</b></label>
+                            <input value={{ user.first_name }} {% if not editable %}disabled{% endif %} id="fname" name="fname"></input>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <label><b>Apellido:</b></label>
+                            <input value={{ user.last_name }} {% if not editable %}disabled{% endif %} id="lname" name="lname"></input>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <label><b>Edad:</b></label>
+                            <input value={{ user.age }} {% if not editable %}disabled{% endif %} id="age" name="age"></input>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                    {% if editable %}
+                        <div>
+                            <input type="submit" name="profile_info" value="Cancelar">
+                        </div>
+                        <div>
+                            <input type="submit" name="profile_info" value="Guardar">
+                        </div>
+                    {% else %}
+                        <div>
+                            <input type="submit" name="profile_info" value="Editar">
+                        </div>
+                    {% endif %}
+                    </div>
+                </form>
+                <div class="mb-2">
+                    <label><b>Generos favoritos</b></label>
+                </div>
+                <form method="POST">
+                    <div class="d-flex justify-content-between mb-2">
+                        <input placeholder="Nuevo genero" id="genre" name="genre"></input>
+                        <input type="submit" name="profile_info" value="Agregar">
+                    </div>
+                </form>
+                <ul>
+                    {% for genre in user.favorite_genres %}
+                    <form method="POST">
+                        <li>
+                            <div class="d-flex justify-content-between">
+                                <label>{{ genre.name }}</label>
+                                <input type="hidden" name="genre_id" value={{ genre.id }}>
+                                <input type="submit" name="profile_info" value="Eliminar">
+                            </div>
+                        </li>
+                    </form>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="mb-3">
+                <h2><b>Películas favoritas</b></h2>
+                <form method="POST">
+                    <div class="d-flex justify-content-between mb-2">
+                        <input placeholder="Nueva pelicula" id="movie" name="movie"></input>
+                        <input type="submit" name="profile_info" value="Agregar">
+                    </div>
+                </form>
+                <ul>
+                    {% for movie in user.favorite_movies %}
+                        <form method="POST">
+                            <li>
+                                <div class="d-flex justify-content-between">
+                                    <label>{{ movie.name }}</label>
+                                    <input type="hidden" name="movie_id" value={{ movie.id }}>
+                                    <input type="submit" name="profile_info" value="Eliminar">
+                                </div>
+                            </li>
+                        </form>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block signUp %}
+<div class="pt-3 pb-2 ps-5">
+    <a href="/"  class="btn btn-secondary">
+        HOME
+    </a>
+</div>
+<div class="d-flex justify-content-center align-items-center">
+    <div class="bg-light border border-light rounded-3 p-5">
+        <h2 class="display-5 fw-bold lh-1 mb-3 d-md-flex justify-content-center">Bienvenido.</h2>
+        <h2 class="display-5 fw-bold lh-1 mb-3 d-md-flex justify-content-center">Crea tu perfil!</h2>
+        <div class="d-grid gap-2 d-md-flex justify-content-center">
+            <form method="POST">
+                <div>
+                    <div class="d-md-flex justify-content-around">
+                        <div>
+                            <div class="mt-4">
+                                <p for="fname">Nombre:</p>
+                                <input type="text" id="fname" name="fname" required="required">
+                            </div>
+                            <div class="mt-4">
+                                <p for="lname">Apellido:</p>
+                                <input type="text" id="lname" name="lname" required="required">
+                            </div>
+                            <div class="mt-4">
+                                <p for="age">Edad:</p>
+                                <input type="text" id="age" name="age" required="required">
+                            </div>
+                        </div>
+                        <div class="ms-5">
+                            <div class="mt-4">
+                                <p for="email">E-mail:</p>
+                                <input type="text" id="email" name="email" required="required">
+                            </div>
+                            <div class="mt-4">
+                                <p for="password">Contraseña:</p>
+                                <input type="password" id="password" name="password" required="required">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 d-md-flex justify-content-end">
+                        <input type="submit" value="Crear">
+                    </div>
+                    <div class="d-md-flex justify-content-end">
+                        <span class="text-danger">{{ error_msg }}</span>
+                    </div>
+                </div>
+                {% if success_msg %}
+                <div class="p-3 mt-2 mb-2 bg-success text-white">
+                    {{ success_msg }} 
+                    <br>
+                    <a href="/">{{ msg }}</a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

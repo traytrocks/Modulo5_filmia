@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block signIn %}
+<div class="pt-3 pb-2 ps-5">
+    <a href="/"  class="btn btn-secondary">
+        HOME
+    </a>
+</div>
+<div class="d-flex justify-content-center align-items-center">
+    <div class="bg-light border border-light rounded-3 p-5">
+        <h2 class="display-5 fw-bold lh-1 mb-3 d-md-flex justify-content-center">Bienvenido de vuelta!</h2>
+        <div class="d-grid gap-2 d-md-flex justify-content-center">
+            <form method="POST">
+                <div class="mt-4">
+                    <p for="email">E-mail:</p>
+                    <input type="text" id="email" name="email">
+                </div>
+                <div class="mt-4">
+                    <p for="password">Contraseña:</p>
+                    <input type="password" id="password" name="password">
+                </div>
+                <div class="mt-4">
+                    <input type="submit" value="Ingresar" class="">
+                </div>
+                <div>
+                    <span class="text-danger">{{ error_msg }}</span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
