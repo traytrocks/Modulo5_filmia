@@ -45,6 +45,11 @@
                                     <input type="submit" class="btn btn-secondary" id="send-message-pre3" name="intent" value="Quiero algo distinto"/>
                                 </form>
                             </div>
+                            <div class="mb-1">
+                                <form method="POST">
+                                    <input type="submit" class="btn btn-secondary" id="send-message-pre4" name="intent" value="Tendencia"/>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -68,6 +73,17 @@
                 </div>
             </div>
         </div>
+        {% if movie_params %}
+        <div class="overflow-auto bg-light border border-light rounded-3 pb-2 p-2 ms-3" style="height:75vh; max-width: 350px;">
+            <div class="container">
+                <p class="small mb-0 d-md-flex justify-content-center"><b>{{movie_params['original_title']}}</b></p>
+                <img src={{movie_params['poster_path']}} alt="Poster pelicula" style="width: 100%">
+                <p class="small mb-0"><b>Fecha de lanzamiento:</b> {{movie_params['release_date']}} </p>
+                <p class="small mb-0"><b>Nota:</b> {{movie_params['vote_average']}} / 10</p>
+                <p class="small mb-0">{{movie_params['overview']}}</p>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
 {% endblock %}

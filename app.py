@@ -4,13 +4,103 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from db import db, db_config
 from models import User, Message, FavoriteMovies, FavoriteGenres
+#from forms import ProfileForm, SignUpForm, LoginForm
+from flask_wtf.csrf import CSRFProtect
+from os import getenv
+import json
+from bot import search_movie_or_tv_show, search_movie_or_tvshows_trailer, search_movie_provider, search_trendings
+from flask_login import LoginManager, login_required, login_user, current_user, logout_user
+from flask_bcrypt import Bcrypt
+from flask import redirect, url_for
+from movies import search
 
 load_dotenv()
 
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.login_message = 'Inicia sesión para continuar'
 client = OpenAI()
 app = Flask(__name__)
+app.secret_key = getenv('SECRET_KEY')
 bootstrap = Bootstrap5(app)
+#csrf = CSRFProtect(app)
+login_manager.init_app(app)
+bcrypt = Bcrypt(app)
 db_config(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+tools = [
+    {
+        'type': 'function',
+        'function': {
+            "name": "search_movie_or_tv_show",
+            "description": "Returns information about a specified movie or TV show.",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the movie/tv show to search for"
+                    }
+                },
+                "additionalProperties": False
+            }
+        },
+    },
+    {
+        'type': 'function',
+        'function': {
+            "name": "search_movie_or_tvshows_trailer",
+            "description": "Returns a youtube url where to watch the trailer of a certain movie.",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the movie/tv show to search for"
+                    }
+                },
+                "additionalProperties": False
+            }
+        },
+    },
+    {
+        'type': 'function',
+        'function': {
+            "name": "search_movie_provider",
+            "description": "Returns a list of providers where to watch a certain movie",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the movie/tv show to search for"
+                    }
+                },
+                "additionalProperties": False
+            }
+        },
+    },
+    {
+        'type': 'function',
+        'function': {
+            "name": "search_trendings",
+            "description": "Return a movie that is in trending",
+        },
+    },
+]
 
 @app.route('/')
 def home():
@@ -76,9 +166,10 @@ def chat(id):
     fav_movies = ', '.join([movie.name for movie in user.favorite_movies])
     fav_genres = ', '.join([genre.name for genre in user.favorite_genres])
     profile_url = "/user/"+str(id)+"/profile"
+    movie_params = {}
 
     if request.method == 'GET':
-        return render_template('chat.html', user=user, profile_url=profile_url)
+        return render_template('chat.html', user=user, profile_url=profile_url, movie_params=movie_params)
 
     if request.method == 'POST':
 
@@ -88,6 +179,7 @@ def chat(id):
             'Genero favorito': f'Recomiéndame una película basada en mis generos favoritos que son : {fav_genres}',
             'Peliculas favoritas': f'Recomiéndame una película basada en mis peliculas favoritas que son : {fav_movies}',
             'Quiero algo distinto': f'Recomiéndame una película alejada de mis gustos favoritos, que no sean {fav_genres} y que no se parezcan a {fav_movies}',
+            'Tendencia': 'Recomiéndame algo en tendencia',
             'Enviar': request.form.get('message')
         }
 
@@ -99,7 +191,7 @@ def chat(id):
 
             messages_for_llm = [{
                 "role": "system",
-                "content": "Eres un chatbot que recomienda películas, te llamas 'Next Moby'. Tu rol es responder recomendaciones de manera breve y concisa. No repitas recomendaciones.",
+                "content": "Eres un chatbot que recomienda películas, te llamas 'Filmia'. Tu rol es responder recomendaciones de manera breve y concisa. No repitas recomendaciones, usa prioritariamente cualquier enlace que venga desde la api tmdbsimple",
             }]
 
             for message in user.messages:
@@ -111,14 +203,43 @@ def chat(id):
             chat_completion = client.chat.completions.create(
                 messages=messages_for_llm,
                 model="gpt-4o",
-                temperature=1
+                temperature=1,
+                tools=tools
             )
+            
+            if chat_completion.choices[0].message.tool_calls:
+                tool_call = chat_completion.choices[0].message.tool_calls[0]
+                if tool_call.function.name == 'search_trendings':
+                    arguments = json.loads(tool_call.function.arguments)
+                    model_recommendation = search_trendings(client, user_message)
+                elif tool_call.function.name == 'search_movie_or_tv_show':
+                    arguments = json.loads(tool_call.function.arguments)
+                    name = arguments['name']
+                    model_recommendation = search_movie_or_tv_show(client, name, user_message)
+                elif tool_call.function.name == 'search_movie_or_tvshows_trailer':
+                    arguments = json.loads(tool_call.function.arguments)
+                    name = arguments['name']
+                    model_recommendation = search_movie_or_tvshows_trailer(client, name, user_message)
+                elif tool_call.function.name == 'search_movie_provider':
+                    arguments = json.loads(tool_call.function.arguments)
+                    name = arguments['name']
+                    model_recommendation = search_movie_provider(client, name, user_message)
+            else:
+                model_recommendation = chat_completion.choices[0].message.content
 
-            model_recommendation = chat_completion.choices[0].message.content
+            if model_recommendation.find('"') != -1:
+                movie = model_recommendation.split('"')[1]
+                result = search(movie)
+                movie_params['original_title'] = result['original_title']
+                movie_params['overview'] = result['overview']
+                movie_params['poster_path'] = 'https://image.tmdb.org/t/p/original'+result['poster_path']
+                movie_params['release_date'] = result['release_date']
+                movie_params['vote_average'] = result['vote_average']
+            
             db.session.add(Message(content=model_recommendation, author="assistant", user=user))
             db.session.commit()
 
-        return render_template('chat.html', user=user, profile_url=profile_url)
+        return render_template('chat.html', user=user, profile_url=profile_url, movie_params=movie_params)
     
 @app.route('/user/<id>/profile', methods=['GET', 'POST'])
 def user(id):
