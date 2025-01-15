@@ -8,9 +8,12 @@ from models import User, Message, FavoriteMovies, FavoriteGenres
 from os import getenv
 import json
 from bot import search_movie_or_tv_show, search_movie_or_tvshows_trailer, search_movie_provider, search_trendings
-from flask_login import LoginManager, login_required, logout_user
+from flask_login import LoginManager, login_required, logout_user, login_user
 from flask import redirect, url_for
 from movies import search
+from flask_bcrypt import Bcrypt
+
+
 
 load_dotenv()
 
@@ -25,21 +28,12 @@ app = Flask(__name__)
 app.secret_key = getenv('SECRET_KEY')
 bootstrap = Bootstrap5(app)
 db_config(app)
+bcrypt = Bcrypt(app)
 login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(email):
     return db.session.query(User).filter_by(email=email).first()
-
-@login_manager.request_loader
-def request_loader(request):
-    email = request.form.get('email')
-    user = db.session.query(User).filter_by(email=email).first()
-
-    if user is None:
-        return
-
-    return user
 
 tools = [
     {
@@ -134,7 +128,11 @@ def signUp():
     if db.session.query(User).filter_by(email=email).first():
         error_msg = "Hubo un problema al registrar el usuario."
     else:
-        user = User(email=email, password=password, first_name=fname, last_name=lname, age=age)
+        user = User(email=email, 
+                    password=bcrypt.generate_password_hash(password).decode('utf-8'), 
+                    first_name=fname, 
+                    last_name=lname, 
+                    age=age)
         db.session.add(user)
         db.session.add(Message(content="Hola! Soy FilmIA, un recomendador de películas. ¿En qué te puedo ayudar?", author="assistant", user=user))
         db.session.commit()
@@ -156,10 +154,11 @@ def signIn():
     if user is None:
         return render_template('signIn.html', error_msg="Hubo un problema al iniciar sesión.")
 
-    if not user.check_password(password):
+    if not bcrypt.check_password_hash(user.password, password):
         return render_template('signIn.html', error_msg="Correo o contraseña incorrectos.")
 
     session['email'] = email
+    login_user()
     return redirect(f'/user/{user.id}/chat')
 
 @app.route('/user/<id>/chat', methods=['GET', 'POST'])

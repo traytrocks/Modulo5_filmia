@@ -10,9 +10,7 @@ from sqlalchemy import (
 )
 from datetime import datetime
 from flask_login import UserMixin
-from flask_bcrypt import Bcrypt
 
-bcrypt = Bcrypt()
 
 
 class User(db.Model, UserMixin):
