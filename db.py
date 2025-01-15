@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
+from flask_migrate import Migrate
 import os
 
 load_dotenv()
@@ -11,6 +12,7 @@ class Base(DeclarativeBase):
 
 
 db = SQLAlchemy(model_class=Base)
+migrate = None
 
 
 def db_config(app):
@@ -19,3 +21,5 @@ def db_config(app):
     db_url = f"sqlite+{turso_database_url}/?authToken={turso_auth_token}&secure=true"
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     db.init_app(app)
+    migrate = Migrate(app, db)
+    

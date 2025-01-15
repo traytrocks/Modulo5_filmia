@@ -9,9 +9,13 @@ from sqlalchemy import (
     ForeignKey,
 )
 from datetime import datetime
+from flask_login import UserMixin
+from flask_bcrypt import Bcrypt
+
+bcrypt = Bcrypt()
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
    __tablename__ = "users"
 
    id = Column(Integer, primary_key=True, autoincrement=True)
@@ -21,11 +25,11 @@ class User(db.Model):
    first_name = Column(String, nullable=False, unique=False)
    last_name = Column(String, nullable=False, unique=False)
    age = Column(Integer, nullable=False, unique=False)
-   favorite_genre = Column(String, nullable=True, unique=False)
    
-   messages = relationship("Message", back_populates="user")
-   favorite_movies = relationship("FavoriteMovies", back_populates="user")
-   favorite_genres = relationship("FavoriteGenres", back_populates="user")
+   messages = relationship("Message", back_populates="user", cascade="all, delete-orphan")
+   favorite_movies = relationship("FavoriteMovies", back_populates="user", cascade="all, delete-orphan")
+   favorite_genres = relationship("FavoriteGenres", back_populates="user", cascade="all, delete-orphan")
+
 
 
 class Message(db.Model):
@@ -34,7 +38,7 @@ class Message(db.Model):
    created_at = Column(DateTime, default=datetime.utcnow)
    content = Column(Text, nullable=False)
    author = Column(String, nullable=False)
-   user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+   user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
    
    user = relationship("User", back_populates="messages")
    
@@ -43,7 +47,7 @@ class FavoriteMovies(db.Model):
    id = Column(Integer, primary_key=True, autoincrement=True)
    created_at = Column(DateTime, default=datetime.utcnow)
    name = Column(String, nullable=False, unique=False)
-   user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+   user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
    
    user = relationship("User", back_populates="favorite_movies")
 
@@ -52,6 +56,6 @@ class FavoriteGenres(db.Model):
    id = Column(Integer, primary_key=True, autoincrement=True)
    created_at = Column(DateTime, default=datetime.utcnow)
    name = Column(String, nullable=False, unique=False)
-   user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+   user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
    
    user = relationship("User", back_populates="favorite_genres")

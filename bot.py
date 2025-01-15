@@ -4,7 +4,7 @@ from models import User
 
 
 def build_prompt():
-    system_prompt = '''Eres un chatbot que recomienda películas, te llamas 'Filmia'.
+    system_prompt = '''Eres un chatbot que recomienda películas, te llamas 'FilmIA'.
     - Tu rol es responder recomendaciones de manera breve y concisa.
     - No repitas recomendaciones.
     - Recuerda siempre mencionar la pelicula
