@@ -5,79 +5,87 @@
 {% endblock %}
 
 {% block content %}
-    <div class="d-md-flex justify-content-between">
-        <div class="pt-3 pb-2 ps-5">
-            <a href="/"  class="btn btn-secondary">
-                HOME
-            </a>
-        </div>
-        <div class="pt-3 pb-2 pe-5">
-            <a href="{{ profile_url }}" class="btn btn-secondary">
-                PERFIL
-            </a>
-        </div>
-    </div>
+    <!-- Navigation bar -->
+    <nav class="d-flex justify-content-between align-items-center py-4 px-4 border-bottom">
+        <a href="/" class="btn btn-outline-secondary px-4">
+            Inicio
+        </a>
+        <h1 class="h3 m-0 text-center">Chat de {{user.first_name}} {{user.last_name}}</h1>
+        <a href="{{ profile_url }}" class="btn btn-outline-secondary px-4">
+            Perfil
+        </a>
+    </nav>
+    <!-- Chat div -->
     <div class="d-flex justify-content-center align-items-center">
-        <div class="bg-light border border-light rounded-3 pb-2">
+        <div class="bg-light border border-light rounded-3 pb-2 shadow">
             <div class="container">
-                <h2 class="d-md-flex justify-content-center">Chat de {{user.first_name}} {{user.last_name}}</h2>
+                <!-- Chat messages -->
+                <div id="chat-messages" class="px-5 py-5 border rounded-3 border-4">
+                    <div id="messages-container">
+                        {% for message in user.messages %}
+                            {% if message.author == 'assistant' %}
+                                <div class="d-flex flex-row justify-content-start mb-4 message">
+                                    <img src="{{ url_for('static', filename='FilmIA.png') }}" alt="avatar 1" style="width: 45px; height: 100%;">
+                                    <div class="p-3 ms-3 assistant-bubble">
+                                        <p class="small mb-0">{{ message.content }}</p>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="d-flex flex-row justify-content-end mb-4 message">
+                                    <div class="p-3 me-3 user-bubble">
+                                        <p class="small mb-0">{{ message.content }}</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Chat input -->
                 <div class="px-4 pt-4">
                     <div class="d-inline input-group mb-3">
-                        <form method="POST">
-                                <div class="d-flex">
-                                <input type="text" name="message" required="required" class="w-100" placeholder="Enviar mensaje a FilmIA" aria-label="Tu mensaje" aria-describedby="send-message"/>
-                                <input type="submit" class="btn btn-secondary" id="send-message" name="intent" value="Enviar"/>
+                        <!-- user message -->
+                        <form method="POST" onsubmit="sendMessage(event)">
+                            <div class="d-flex">
+                                <input id="message" name="message" required="required" 
+                                    class="form-control" placeholder="Enviar mensaje a FilmIA" 
+                                    aria-label="Tu mensaje" aria-describedby="send-message"/>
+                                <button type="submit" class="btn btn-primary" id="send-message">Enviar</button>
                             </div>
                         </form>
+                        <!-- user fast actions -->
                         <div class="d-md-flex justify-content-around pt-2">
                             <div class="mb-1">
-                                <form method="POST">
-                                    <input type="submit" class="btn btn-secondary" id="send-message-pre1" name="intent" value="Genero favorito"/>
+                                <form method="POST" onsubmit="sendSuggestionToBackend('Genero favorito', event)">
+                                    <button type="submit" class="btn btn-outline-secondary" id="send-message-pre1" onclick="sendSuggestionToBackend('Genero favorito', event)" name="intent" value="Genero favorito">Genero favorito</button>
                                 </form>
                             </div>
                             <div class="mb-1">
-                                <form method="POST">
-                                    <input type="submit" class="btn btn-secondary" id="send-message-pre2" name="intent" value="Peliculas favoritas"/>
+                                <form method="POST" onsubmit="sendSuggestionToBackend('Películas favoritas', event)">
+                                    <button type="submit" class="btn btn-outline-secondary" id="send-message-pre2" onclick="sendSuggestionToBackend('Películas favoritas', event)" name="intent" value="Películas favoritas">Películas favoritas</button>
                                 </form>
                             </div>
                             <div class="mb-1">
-                                <form method="POST">
-                                    <input type="submit" class="btn btn-secondary" id="send-message-pre3" name="intent" value="Quiero algo distinto"/>
+                                <form method="POST" onsubmit="sendSuggestionToBackend('Quiero algo distinto', event)">
+                                    <button type="submit" class="btn btn-outline-secondary" id="send-message-pre3" onclick="sendSuggestionToBackend('Quiero algo distinto', event)" name="intent" value="Quiero algo distinto">Quiero algo distinto</button>
                                 </form>
                             </div>
                             <div class="mb-1">
-                                <form method="POST">
-                                    <input type="submit" class="btn btn-secondary" id="send-message-pre4" name="intent" value="Tendencia"/>
+                                <form method="POST" onsubmit="sendSuggestionToBackend('Tendencia', event)">
+                                    <button type="submit" class="btn btn-outline-secondary" id="send-message-pre4" onclick="sendSuggestionToBackend('Tendencia', event)" name="intent" value="Tendencia">Tendencia</button>
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="overflow-auto px-5 py-5 border rounded-3 border-4" style="max-height: 70vh;">
-                    {% for message in user.messages[::-1] %}
-                        {% if message.author == 'assistant' %}
-                            <div class="d-flex flex-row justify-content-start mb-4">
-                                <img src="{{ url_for('static', filename='FilmIA.png') }}" alt="avatar 1" style="width: 45px; height: 100%;">
-                                <div class="p-3 ms-3" style="border-radius: 1.125rem 1.125rem 1.125rem 0; background: #EEE;">
-                                    <p class="small mb-0">{{ message.content }}</p>
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="d-flex flex-row justify-content-end mb-4">
-                                <div class="p-3 me-3" style="border-radius: 1.125rem 1.125rem 0 1.125rem; background: grey; box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);">
-                                    <p class="small mb-0">{{ message.content }}</p>
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
             </div>
         </div>
+        <!-- Movie preview -->
         {% if movie_params %}
-        <div class="overflow-auto bg-light border border-light rounded-3 pb-2 p-2 ms-3" style="height:75vh; max-width: 350px;">
+        <div class="overflow-auto bg-light border border-light rounded-3 pb-2 p-2 ms-3 shadow" style="height:75vh; max-width: 350px;">
             <div class="container">
                 <p class="small mb-0 d-md-flex justify-content-center"><b>{{movie_params['original_title']}}</b></p>
-                <img src={{movie_params['poster_path']}} alt="Poster pelicula" style="width: 100%">
+                <img src={{movie_params['poster_path']}} alt="Poster película" style="width: 100%">
                 <p class="small mb-0"><b>Fecha de lanzamiento:</b> {{movie_params['release_date']}} </p>
                 <p class="small mb-0"><b>Nota:</b> {{movie_params['vote_average']}} / 10</p>
                 <p class="small mb-0">{{movie_params['overview']}}</p>
@@ -85,5 +93,316 @@
         </div>
         {% endif %}
     </div>
+    
+    <!-- Movie Info right off canvas -->
+    <button class="btn btn-secondary position-fixed" type="button" id="toggleOffcanvas" style="right: 20px; bottom: 20px; z-index: 1000; display: none;">
+        <i class="bi bi-film"></i> Ver ultima película recomendada
+    </button>
+    <div class="offcanvas offcanvas-end text-white" tabindex="-1" id="movieOffcanvas" aria-labelledby="movieOffcanvasLabel">
+        <div class="offcanvas-header border-bottom border-secondary">
+            <h5 class="offcanvas-title" id="movieOffcanvasLabel">Información de la Película</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="movie-info">
+                <div class="text-center mb-4">
+                    <img id="moviePoster" src="" alt="Poster película" class="img-fluid rounded shadow" style="max-height: 400px;">
+                </div>
+                <h3 id="movieTitle" class="mb-3"></h3>
+                <div class="movie-details">
+                    <p><strong>Fecha de lanzamiento:</strong> <span id="movieRelease"></span></p>
+                    <p><strong>Calificación:</strong> <span id="movieRating"></span> / 10</p>
+                    <h5>Sinopsis</h5>
+                    <p id="movieOverview" class="text-white-75"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<style>
+    #chat-messages {
+        overflow-y: auto;
+        max-height: 70vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #messages-container {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .message, .loading-spinner {
+        margin-bottom: 1rem;
+    }
+
+    .loading-spinner {
+        display: none;
+    }
+
+    .loading-spinner.show {
+        display: flex !important;
+    }
+
+    .spinner-border {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .assistant-bubble {
+        border-radius: 1.125rem 1.125rem 1.125rem 0;
+        background: #EEE;
+    }
+
+    .user-bubble {
+        border-radius: 1.125rem 1.125rem 0 1.125rem;
+        background: grey;
+        box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+    }
+
+    .loading-bubble {
+        background: #EEE;
+        width: 60px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .genre-badge {
+        background-color: #e9ecef;
+        border-radius: 20px;
+        padding: 5px 15px;
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .movie-info {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .offcanvas {
+        background-color: #212529;
+        width: 400px;
+    }
+
+    .genre-badge {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 5px 15px;
+        font-size: 0.9rem;
+        color: #fff;
+    }
+
+    .movie-info {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .text-white-75 {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    @media (max-width: 576px) {
+        .offcanvas {
+            width: 100%;
+        }
+    }
+
+    #toggleOffcanvas {
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    #toggleOffcanvas:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s;
+    }
+
+    .form-control {
+        background-color: #ffffff; /* Fondo blanco */
+        color: #000000; /* Texto negro */
+        border: 1px solid #ced4da; /* Borde gris claro */
+        border-radius: 0.25rem; /* Bordes redondeados */
+        padding: 0.375rem 0.75rem; /* Espaciado interno */
+        font-size: 1rem; /* Tamaño de fuente */
+        line-height: 1.5; /* Altura de línea */
+    }
+
+    .form-control:focus {
+        background-color: #ffffff; /* Fondo blanco */
+        color: #000000; /* Texto negro */
+        border-color: #80bdff; /* Borde azul claro */
+        outline: none; /* Sin borde adicional */
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Sombra azul clara */
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    let movieOffcanvas;
+    let currentMovieData = null;
+    const toggleButton = document.getElementById('toggleOffcanvas');
+    const messagesContainer = document.getElementById('messages-container');
+
+    document.addEventListener('DOMContentLoaded', function() {
+        movieOffcanvas = new bootstrap.Offcanvas(document.getElementById('movieOffcanvas'));
+        
+        // Evento para mostrar el botón cuando se cierra el offcanvas
+        document.getElementById('movieOffcanvas').addEventListener('hidden.bs.offcanvas', function () {
+            if (currentMovieData) {
+                toggleButton.style.display = 'block';
+            }
+        });
+
+        // Evento para ocultar el botón cuando se abre el offcanvas
+        document.getElementById('movieOffcanvas').addEventListener('shown.bs.offcanvas', function () {
+            toggleButton.style.display = 'none';
+        });
+
+        // Evento click para el botón de toggle
+        toggleButton.addEventListener('click', function() {
+            movieOffcanvas.show();
+        });
+    });
+
+    function updateMovieInfo(movieData) {
+        currentMovieData = movieData; // Guardar los datos de la película actual
+        
+        document.getElementById('movieTitle').textContent = movieData.original_title;
+        document.getElementById('moviePoster').src = movieData.poster_path;
+        document.getElementById('movieRelease').textContent = formatDate(movieData.release_date);
+        document.getElementById('movieRating').textContent = movieData.vote_average;
+        document.getElementById('movieOverview').textContent = movieData.overview;
+
+        movieOffcanvas.show();
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString('es-ES', options);
+    }
+
+    function createLoadingSpinner() {
+        return `
+            <div class="d-flex flex-row justify-content-start loading-spinner">
+                <img src="{{ url_for('static', filename='FilmIA.png') }}" 
+                     alt="avatar 1" style="width: 45px; height: 100%;">
+                <div class="p-3 ms-3 loading-bubble assistant-bubble">
+                    <div class="spinner-border" style="color: #666;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    async function sendMessage(event) {
+        console.log("entra a sendMessage")
+        event.preventDefault();
+        var messageInput = document.getElementById('message');
+        var message = messageInput.value;
+        if (!message) {
+            console.log("No hay mensajes a enviar")
+            return
+        }
+        addMessageToChat({ author: 'user', content: message });
+        messageInput.value = '';
+        showLoading();
+        try {
+            let response = await fetch('chat', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            const data = await response.json();
+
+            hideLoading();
+            
+            addMessageToChat(data.message);
+            
+            if (data.movie_params && Object.keys(data.movie_params).length !== 0) {
+                updateMovieInfo(data.movie_params);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            hideLoading();
+        }
+    }
+
+    function scrollToBottom() {
+        var chatMessage = document.getElementById('chat-messages');
+        if (chatMessage) chatMessage.scrollTop = chatMessage.scrollHeight;
+    }
+
+    function addMessageToChat(message) {
+        const messageHTML = message.author === 'assistant' 
+            ? `<div class="d-flex flex-row justify-content-start mb-4 message">
+                   <img src="{{ url_for('static', filename='FilmIA.png') }}" alt="avatar 1" style="width: 45px; height: 100%;">
+                   <div class="p-3 ms-3 assistant-bubble">
+                       <p class="small mb-0">${message.content}</p>
+                   </div>
+               </div>`
+            : `<div class="d-flex flex-row justify-content-end mb-4 message">
+                   <div class="p-3 me-3 user-bubble">
+                       <p class="small mb-0">${message.content}</p>
+                   </div>
+               </div>`;
+
+        if (messagesContainer) {
+            messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+            scrollToBottom();
+        }
+    }
+
+    function sendSuggestionToBackend(suggestion, event) {
+        console.log("entra a sendSuggestionToBackend")
+        event.preventDefault();
+        var messageInput = document.getElementById('message');
+        messageInput.value = suggestion;
+        sendMessage(event);
+    }
+
+    function showLoading() {
+        const messagesContainer = document.getElementById('messages-container');
+        // Eliminar cualquier spinner existente
+        const existingSpinner = messagesContainer.querySelector('.loading-spinner');
+        if (existingSpinner) {
+            existingSpinner.remove();
+        }
+
+        // Agregar el nuevo spinner al final
+        messagesContainer.insertAdjacentHTML('beforeend', createLoadingSpinner());
+        const newSpinner = messagesContainer.querySelector('.loading-spinner');
+        newSpinner.classList.add('show');
+        scrollToBottom();
+    }
+
+    function hideLoading() {
+        const messagesContainer = document.getElementById('messages-container');
+        const spinner = messagesContainer.querySelector('.loading-spinner');
+        if (spinner) {
+            spinner.remove();
+        }
+    }
+
+    window.onload = function () {
+        scrollToBottom();
+    }
+</script>
 {% endblock %}

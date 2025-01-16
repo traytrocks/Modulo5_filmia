@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-bs-theme="dark">
+<html lang="es" data-bs-theme="light">
     <head>
         {% block head %}
         <!-- Required meta tags -->
@@ -11,6 +11,82 @@
             <style>
                 :root {
                     --bs-body-color: #000000;
+                }
+                body {
+                    background-color: #f8f9fa;
+                }
+                input[type="text"], input[type="password"], input[type="email"] {
+                    background-color: #ffffff; /* Fondo blanco */
+                    color: #000000; /* Texto negro */
+                }
+
+                input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
+                    background-color: #ffffff; /* Fondo blanco */
+                    color: #000000; /* Texto negro */
+                    border-color: #28a745; /* Borde verde */
+                    outline: none; /* Sin borde adicional */
+                }
+                .form-container {
+                    max-width: 600px;
+                    margin: auto;
+                    padding: 2rem;
+                    background-color: #ffffff;
+                    border-radius: 10px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                }
+                .form-title {
+                    text-align: center;
+                    margin-bottom: 1.5rem;
+                }
+                .form-group {
+                    margin-bottom: 1rem;
+                }
+                .form-group label {
+                    display: block;
+                    margin-bottom: 0.5rem;
+                }
+                .form-group input {
+                    width: 100%;
+                    padding: 0.5rem;
+                    border: 1px solid #ced4da;
+                    border-radius: 5px;
+                    background-color: #ffffff; /* Fondo blanco */
+                    color: #000000; /* Texto negro */
+                }
+                .form-group input:focus {
+                    border-color: #80bdff;
+                    outline: 0;
+                    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+                }
+                .form-actions {
+                    text-align: right;
+                }
+                .form-actions input {
+                    padding: 0.5rem 1rem;
+                    border: none;
+                    border-radius: 5px;
+                    background-color: #007bff;
+                    color: #ffffff;
+                    cursor: pointer;
+                }
+                .form-actions input:hover {
+                    background-color: #0056b3;
+                }
+                .error-message {
+                    color: #dc3545;
+                    text-align: right;
+                }
+                .success-message {
+                    background-color: #28a745;
+                    color: #ffffff;
+                    padding: 1rem;
+                    border-radius: 5px;
+                    text-align: center;
+                    margin-top: 1rem;
+                }
+                .success-message a {
+                    color: #ffffff;
+                    text-decoration: underline;
                 }
             </style>
         {% endblock %}

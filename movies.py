@@ -1,19 +1,20 @@
 import tmdbsimple as tmdb
 from dotenv import load_dotenv
 from os import getenv
+from json import dumps
 
 load_dotenv()
 tmdb.API_KEY = getenv('TMDB_API_KEY')
 
 
 def search(movie_name):
-    search = tmdb.Search()
-    response = search.multi(query=movie_name, language='es-CL')
+    search_results = tmdb.Search().multi(query=movie_name, language='es-CL')
+    #response = search_results.multi(query=movie_name, language='es-CL')
 
-    if not search.results:
+    if 'results' not in search_results:
         return None
 
-    return search.results[0]
+    return search_results['results'][0]
 
 def search_provider(movie_name):
     movie = search(movie_name)
@@ -24,7 +25,7 @@ def search_provider(movie_name):
     
     if 'CL' in provider_response['results']:
         return provider_response['results']['CL']
-    return 'No es posible ver la pelicula en Chile.'
+    return 'No es posible ver la película en Chile.'
 
 def get_youtube_trailer(movie_name):
     movie = search(movie_name)

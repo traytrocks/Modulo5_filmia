@@ -20,6 +20,10 @@ def db_config(app):
     turso_auth_token = os.environ.get("TURSO_AUTH_TOKEN")
     db_url = f"sqlite+{turso_database_url}/?authToken={turso_auth_token}&secure=true"
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'connect_args': {'check_same_thread': False}
+    }
     db.init_app(app)
     migrate = Migrate(app, db)
     
