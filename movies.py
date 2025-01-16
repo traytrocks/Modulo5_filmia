@@ -11,7 +11,7 @@ def search(movie_name):
     search_results = tmdb.Search().multi(query=movie_name, language='es-CL')
     #response = search_results.multi(query=movie_name, language='es-CL')
 
-    if 'results' not in search_results:
+    if 'results' not in search_results or not len(search_results['results']):
         return None
 
     return search_results['results'][0]

@@ -1,4 +1,4 @@
-from flask import Flask, flash, redirect, render_template, request, session, jsonify
+from flask import Flask, redirect, render_template, request, session, jsonify
 from flask_bootstrap import Bootstrap5
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -12,6 +12,7 @@ from flask_login import LoginManager, login_required, logout_user, login_user, c
 from flask import redirect, url_for
 from movies import search
 from flask_bcrypt import Bcrypt
+import re
 
 
 
@@ -178,9 +179,10 @@ def chat():
     fav_genres = ', '.join([genre.name for genre in user.favorite_genres])
     profile_url = "/profile"
     movie_params = {}
+    video_id = None
 
     if request.method == 'GET':
-        print("Entra al get de chat", flush=True)
+        #print("Entra al get de chat", flush=True)
         return render_template('chat.html', user=user, profile_url=profile_url, movie_params=movie_params)
 
     intent = request.form.get('intent')
@@ -237,6 +239,9 @@ def chat():
             arguments = json.loads(tool_call.function.arguments)
             name = arguments['name']
             model_recommendation = search_movie_or_tvshows_trailer(client, name, user_message)
+            video_id = extract_youtube_id(model_recommendation)
+            print(f"mensaje: {model_recommendation}", flush=True)
+            print(f"video_id: {video_id}", flush=True)
         elif tool_call.function.name == 'search_movie_provider':
             arguments = json.loads(tool_call.function.arguments)
             name = arguments['name']
@@ -261,7 +266,29 @@ def chat():
     
     accept_header = request.headers.get('Accept')
     if accept_header and 'application/json' in accept_header:
-        return {
+        if video_id:
+            response = {
+                'message': {
+                    'content': chatbot_response.content,
+                    'author': 'assistant',
+                    'type': 'youtube',
+                    'video_id': video_id
+                },
+                'movie_params': movie_params
+            }
+        else:
+            # Respuesta normal sin video
+            response = {
+                'message': {
+                    'content': chatbot_response.content,
+                    'author': 'assistant',
+                    'type': 'text'
+                },
+                'movie_params': movie_params
+            }
+    
+    return jsonify(response)
+    """     return {
             "message": {
                 "author": chatbot_response.author,
                 "content": chatbot_response.content,
@@ -270,7 +297,7 @@ def chat():
         }, 200
                 
     print("llega al final", flush=True)
-    return render_template('chat.html', user=user, profile_url=profile_url, movie_params=movie_params)
+    return render_template('chat.html', user=user, profile_url=profile_url, movie_params=movie_params) """
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -324,6 +351,14 @@ def logout():
 @login_manager.unauthorized_handler
 def unauthorized_handler():
     return redirect(url_for('home'))
+
+def extract_youtube_id(texto):
+    if texto:
+        texto_aux = texto.split('=')[1]
+        video_id = texto_aux.split(').')[0]
+        return video_id
+    else:
+        return None
 
 if __name__ == '__main__':
     app.run(debug=True)
